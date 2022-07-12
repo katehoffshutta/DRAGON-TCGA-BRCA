@@ -1,0 +1,303 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={DRAGON analytic expressions},
+  pdfauthor={Kate},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{DRAGON analytic expressions}
+\author{Kate}
+\date{2022-05-30}
+
+\begin{document}
+\maketitle
+
+\hypertarget{goal}{%
+\subsection{Goal}\label{goal}}
+
+Equation 8 of the main manuscript decomposes the quantity
+
+\[
+R = E\left[||\hat\Sigma - \Sigma||^2_F\right]
+\]
+
+into terms which can be efficiently calculated analytically, yielding
+estimates for optimal regularization parameters \(\lambda_1\) and
+\(\lambda_2\) of DRAGON in the 2-omic case. Here, we derive this
+equation.
+
+\hypertarget{notation}{%
+\subsection{Notation}\label{notation}}
+
+Let \(\Sigma = \{\sigma_{ij}\}\) be the true population covariance and
+let \(S = \{s_{ij}\}\) be sample covariance, i.e., the usual maximum
+likelihood estimator for \(\Sigma\). Next, let
+\(\hat\Sigma = \{\hat{\sigma}_{ij}\}\) be the covariance shrinkage
+estimator defined in the main manuscript, i.e.:
+
+\[
+\hat\Sigma = \{\hat\sigma_{ij}\} = \left(\begin{matrix}
+(1-\lambda_1)S^{(1,1)} & \sqrt{1-\lambda_1}\sqrt{1-\lambda_2}S^{(1,2)} \\
+\sqrt{1-\lambda_2}\sqrt{1-\lambda_1}S^{(2,1)} & (1-\lambda_2)S^{(2,2)} \\
+\end{matrix}
+\right) + \left(\begin{matrix} 
+\lambda_1 \text{diag}(S^{(1,1)}) & 0 \\ 
+0 & \lambda_2 \text{diag}(S^{(2,2)})) \\
+\end{matrix}\right)
+\]
+
+where we have divided \(S\) into blocks consisting of \(S^{(1,1)}\), the
+sample covariance of omics layer 1; \(S^{(2,2)}\), the sample covariance
+of omics layer 2; and \(S^{(1,2)} = t(S^{(2,1)})\), the sample
+covariance between omics layer 1 and omics layer 2.
+
+\hypertarget{derivation}{%
+\subsection{Derivation}\label{derivation}}
+
+We derive an expression for \(R\) in terms of \(\lambda_1\) and
+\(\lambda_2\) by considering three cases:
+
+\begin{enumerate}
+\def\labelenumi{(\roman{enumi})}
+\tightlist
+\item
+  \(i,j\) such that \(\sigma_{ij}\) represents the within-omic
+  covariance of two variables \(i\) and \(j\), both in omics layer 1
+\item
+  \(i,j\) such that \(\sigma_{ij}\) represents the within-omic
+  covariance of two variables \(i\) and \(j\), both in omics layer 2
+\item
+  \(i,j\) such that \(\sigma_{ij}\) represents the between-omic
+  covariance of variable \(i\), which is in omics layer 1, and variable
+  \(j\), which is in omics layer 2.
+\end{enumerate}
+
+In deriving these steps, we partition \(R\) into the sum of four
+components: \(R^{(1,1)}\), obtained from \(\Sigma^{(1,1)}\) and
+\(S^{(1,1)}\); \(R^{(2,2)}\), obtained from \(\Sigma^{(2,2)}\) and
+\(S^{(2,2)}\); \(R^{(1,2)}\), obtained from \(\Sigma^{(1,2)}\) and
+\(S^{(1,2)}\); and \(R^{(2,1)}\), obtained from \(\Sigma^{(2,1)}\) and
+\(S^{(2,1)}\). From these, we can write the final equation
+
+\[
+\begin{aligned}
+R &= R^{(1,1)} + R^{(2,2)} + R^{(1,2)} + R^{(2,1)} \\
+&= R^{(1,1)} + R^{(2,2)} + 2R^{(1,2)}
+\end{aligned}
+\] where the last line arises due to the symmetric nature of the
+covariance matrix and the Frobenius norm.
+
+\hypertarget{case-i-both-variables-in-omics-layer-1}{%
+\subsubsection{Case (i): both variables in omics layer
+1}\label{case-i-both-variables-in-omics-layer-1}}
+
+In this case, we have
+
+\[
+\begin{aligned}
+R^{(1,1)} = E\left[||\hat\Sigma^{(1,1)} - \Sigma^{(1,1)}||^2_F\right] &= \sum_{i,j}E\left[(\hat\sigma_{ij} - \sigma_{ij})^2\right] \\
+&= \sum_{i = j}E\left[\left((1-\lambda_1)s_{ij} + \lambda_1{s_{ij}} - \sigma_{ij}\right)^2\right] + \sum_{i \neq j}E\left[\left((1-\lambda_1)s_{ij} - \sigma_{ij}\right)^2\right] \\
+&= \sum_{i = j}E\left[\left(s_{ij} -\sigma_{ij}\right)^2\right] 
+ + \sum_{i \neq j}E\left[\left((1-\lambda_1)s_{ij} - \sigma_{ij}\right)^2\right] \\
+\end{aligned}
+\]
+
+Next, we use the standard identity:
+
+\[
+\begin{aligned}
+Var[U] &= E[U^2] - (E[U])^2 \\
+E[U^2] &= Var[U] + (E[U])^2
+\end{aligned}
+\]
+
+First, when \(i \neq j\), let \(U = s_{ij} - \sigma_{ij}\). Then we have
+
+\[
+\begin{aligned}
+R^{(1,1)} &= \sum_{i = j}Var[s_{ij} -\sigma_{ij}] + (E[s_{ij} - \sigma_{ij}])^2
+ +  \sum_{i \neq j}E\left[\left((1-\lambda_1)s_{ij} - \sigma_{ij}\right)^2\right] \\
+&=  \sum_{i = j}Var[s_{ij}]  +  \sum_{i \neq j}E\left[\left((1-\lambda_1)s_{ij} - \sigma_{ij}\right)^2\right] 
+\end{aligned}
+\] where the latter line arises because \(s_{ij}\) is an unbiased
+estimator of \(\sigma_{ij}\). Next, we consider the term when
+\(i \neq j\), letting \(U = (1-\lambda_1)s_{ij} - \sigma_{ij}\).
+
+\[
+\begin{aligned}
+R^{(1,1)} &=  \sum_{i = j}Var[s_{ij}]  +  \sum_{i \neq j} 
+Var[(1-\lambda_1)s_{ij} - \sigma_{ij}] + (E[(1-\lambda_1)s_{ij} - \sigma_{ij}])^2 \\
+&= \sum_{i=j}Var[s_{ij}] + \sum_{i \neq j}(1-\lambda_1)^2Var[s_{ij}] + ((1-\lambda_1)E[s_{ij}] - \sigma_{ij})^2 \\
+&= \sum_{i=j}Var[s_{ij}] + \sum_{i \neq j}(1-\lambda_1)^2Var[s_{ij}] + \lambda_1^2(E[s_{ij}])^2  \\
+&= \sum_{i=j} Var[s_{ij}] + \sum_{i \neq j}Var[s_{ij}]-2\lambda_1Var[s_{ij}] + \lambda_1^2Var[s_{ij}] + \lambda_1^2(E[s_{ij}])^2 \\
+&= \sum_{i,j}Var[s_{ij}] + \sum_{i \neq j}-2\lambda_1Var[s_{ij}] + \lambda_1^2E[s_{ij}^2]
+\end{aligned}
+\]
+
+\hypertarget{case-ii-both-omics-variables-in-layer-2}{%
+\subsubsection{Case (ii): both omics variables in layer
+2}\label{case-ii-both-omics-variables-in-layer-2}}
+
+In this case, we can follow the analogy to the argument above to arrive
+at
+
+\[
+R^{(2,2)} = \sum_{i,j}Var[s_{ij}] + \sum_{i \neq j}-2\lambda_2Var[s_{ij}] + \lambda_2^2E[s_{ij}^2]
+\]
+
+\hypertarget{case-iii-variable-i-is-in-omics-layer-1-and-variable-j-is-in-omics-layer-2.}{%
+\subsubsection{\texorpdfstring{Case (iii): variable \(i\) is in omics
+layer 1 and variable \(j\) is in omics layer
+2.}{Case (iii): variable i is in omics layer 1 and variable j is in omics layer 2.}}\label{case-iii-variable-i-is-in-omics-layer-1-and-variable-j-is-in-omics-layer-2.}}
+
+In this case, we derive \(R^{(1,2)}\), noting that
+\(R^{(2,1)} = R^{(1,2)}\) by symmetry.
+
+\[
+\begin{aligned}
+R^{(1,2)} &= E\left[||\hat\Sigma^{(1,2)} - \Sigma^{(1,2)}||^2_F\right] \\
+&= \sum_{i,j}E\left[(\hat\sigma_{ij}-\sigma_{ij})^2\right] \\
+&= \sum_{i,j} Var[\hat\sigma_{ij}-\sigma_{ij}] + (E[\hat\sigma_{ij}-\sigma_{ij}])^2 \\
+&= \sum_{i,j} (1-\lambda_1)(1-\lambda_2)Var[s_{ij}] + (E[\hat\sigma_{ij}-s_{ij}+s_{ij}-\sigma_{ij}])^2\\
+&= \sum_{i,j} (1-\lambda_1)(1-\lambda_2)Var[s_{ij}] + (E[\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}s_{ij}-s_{ij}] + E[s_{ij}-\sigma_{ij}])^2 \\
+&= \sum_{i,j} (1-\lambda_1)(1-\lambda_2)Var[s_{ij}] + (\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}-1)^2(E[s_{ij}])^2
+\end{aligned}
+\]
+
+Now the expression is in terms of the variance and expectation of the
+sample covariance, which we can easily approximate with moment
+estimators. We continue manipulating the expression:
+
+\[
+\begin{aligned}
+R^{(1,2)} &= \sum_{i,j} \left\{1-\lambda_1-\lambda_2+\lambda_1\lambda_2\right\}Var[s_{ij}] + \left\{(1-\lambda_1)(1-\lambda_2) - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2} + 1\right\}(E[s_{ij}])^2 \\
+&= \sum_{i,j} \left\{1-\lambda_1-\lambda_2+\lambda_1\lambda_2\right\}Var[s_{ij}] + \left\{2 -\lambda_1 -\lambda_2 + \lambda_1\lambda_2 - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\right\}(E[s_{ij}])^2  \\
+\end{aligned}
+\] Next, we again apply the identity \((E[U])^2=E[U^2]-Var[U]\):
+
+\[
+\begin{aligned}
+&= \sum_{i,j} \left\{1-\lambda_1-\lambda_2+\lambda_1\lambda_2\right\}Var[s_{ij}] + \left\{2 -\lambda_1 -\lambda_2 + \lambda_1\lambda_2 - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\right\}(E[s_{ij}^2]-Var[s_{ij}]) \\
+& = \sum_{i,j}\left\{1-\lambda_1-\lambda_2+\lambda_1\lambda_2  - (2 - \lambda_1 - \lambda_2 + \lambda_1\lambda_2 - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2})\right\}Var[s_{ij}] \\
+& + \left\{2 - \lambda_1 - \lambda_2 + \lambda_1\lambda_2 - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\right\}E[s_{ij}^2] \\
+& = \sum_{i,j}\left\{-1 + 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\right\}Var[s_{ij}] + \left\{2 - \lambda_1 - \lambda_2 + \lambda_1\lambda_2 - 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\right\}E[s_{ij}^2] \\
+&= -\sum_{i,j}Var[s_{ij}] + 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2]) + (2-\lambda_1 - \lambda_2 + \lambda_1\lambda_2)\sum_{i,j}E[s_{ij}^2])
+\end{aligned}
+\]
+
+\hypertarget{combining-cases-i-ii-and-iii}{%
+\subsubsection{Combining cases (i), (ii), and
+(iii)}\label{combining-cases-i-ii-and-iii}}
+
+Our final expression for \(R\) is
+
+\[
+\begin{aligned}
+R &= R^{(1,1)} + R^{(2,2)} + 2R^{(1,2)} \\
+&= \sum_{i,j}Var[s_{ij}] + \sum_{i \neq j}-2\lambda_1Var[s_{ij}] + \lambda_1^2E[s_{ij}^2] \\
+& + \sum_{i,j}Var[s_{ij}] + \sum_{i \neq j}-2\lambda_2Var[s_{ij}] + \lambda_2^2E[s_{ij}^2]  \\
+& + 2*\left\{-\sum_{i,j}Var[s_{ij}] + 2\sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2]) + (2-\lambda_1 - \lambda_2 + \lambda_1\lambda_2)\sum_{i,j}E[s_{ij}^2])\right\} \\
+&= \sum_{i \neq j}-2\lambda_1Var[s_{ij}] + \lambda_1^2E[s_{ij}^2]  + -2\lambda_2Var[s_{ij}] + \lambda_2^2E[s_{ij}^2] \\
+& +4\sqrt{1-\lambda_1}\sqrt{1-\lambda_2} \sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2])  \\
+& + 2*(2-\lambda_1 - \lambda_2 + \lambda_1\lambda_2)\sum_{i,j}E[s_{ij}^2] \\
+\end{aligned}
+\]
+
+Combining like terms for functions of \(\lambda_1\) and \(\lambda_2\),
+we can write
+
+\[
+\begin{aligned}
+R &= \sum_{i \neq j}-2\lambda_1Var[s_{ij}] + \lambda_1^2E[s_{ij}^2]  + -2\lambda_2Var[s_{ij}] + \lambda_2^2E[s_{ij}^2] \\
+& + 4\sqrt{1-\lambda_1}\sqrt{1-\lambda_2} \sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2])  \\
+& + 2*(2-\lambda_1 - \lambda_2 + \lambda_1\lambda_2)\sum_{i,j}E[s_{ij}^2] \\
+& = 4 \sum_{i,j} E[s_{ij}^2 \\
+& + \lambda_1 \left\{-2\sum_{i \neq j} Var[s_{ij}] - 2\sum_{i,j}E[s_{ij}^2]\right\} \\
+& + \lambda_2 \left\{-2\sum_{i \neq j} Var[s_{ij}] - 2\sum_{i,j}E[s_{ij}^2]\right\} \\
+& + \lambda_1^2\sum_{i \neq j}E[s_{ij}^2] \\
+& + \lambda_2^2\sum_{i \neq j}E[s_{ij}^2] \\
+& + \lambda_1\lambda_2\left\{2\sum_{i \neq j}E[s_{ij}^2]\right\} \\
+& + \sqrt{1-\lambda_1}\sqrt{1-\lambda_2}\left\{4\sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2])\right\}
+\end{aligned}
+\]
+
+This expression is of the form
+
+\[
+R = \text{const.} + \lambda_1T_1^{(1)} + \lambda_2T_1^{(2)} + \lambda_1^2T_2^{(1)} + \lambda_1^2T_2^{(2)} + \lambda_1\lambda_2T_3 + \sqrt{1-\lambda_1}\sqrt{1-\lambda_2}T_4
+\]
+
+where the first term is a constant with respect to \(\lambda_1\) and
+\(\lambda_2\) and the remaining terms \(T\) are defined as:
+
+\[
+\begin{aligned}
+T_1^{(k)} &= -2\left(\sum_{i \neq j} Var[s_{ij}] + \sum_{i,j}E[s_{ij}^2]\right) ; k = 1,2 \\
+T_2^{(k)} &= \sum_{i \neq j}E[s_{ij}^2] ; k = 1,2 \\
+T_3 &= 2\sum_{i,j}E[s_{ij}^2] \\
+T_4 &= 4\sum_{i,j}(Var[s_{ij}] - E[s_{ij}^2]) \\
+\end{aligned}
+\] \# Remaining to do
+
+These sums are only over a subset of the i and j, that correspond to
+e.g.~omics 1 and omics 2. We need to add some notation to reflect this.
+
+\end{document}

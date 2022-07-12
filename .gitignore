@@ -1,0 +1,49 @@
+# Ignore everything
+.*
+
+# Track main files
+!README.md
+!LICENSE
+!.gitignore
+!.bumpversion.cfg
+
+# Code
+!src
+!src/*
+!src/**
+
+# Reports
+!reports*
+!reports/*
+!reports/**
+
+# Notebooks
+!notebooks
+!notebooks/*
+!notebooks/**
+
+# R files
+.Rproj.user
+.Rproj
+
+# big rda by default
+*.rda
+*.Rda
+*.RData
+
+# mac stuff
+.DS_Store
+
+# all tcga for now
+data/external/tcga_BRCA_methylation/*
+
+# emacs backup files
+*~
+
+# nb.html intermediates
+*.nb.html
+
+.gitkeep
+
+# giant illumina manifest
+data/external/humanmethylation450_15017482_v1-2.csv

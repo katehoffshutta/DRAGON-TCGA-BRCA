@@ -1,0 +1,7 @@
+name: r_env
+channels:
+  - conda-forge
+  - defaults
+  - bioconda
+dependencies:
+  - r-base=4.1.1
