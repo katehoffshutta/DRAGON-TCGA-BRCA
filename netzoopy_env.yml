@@ -1,0 +1,10 @@
+name: netzoopy_env
+channels:
+  - netzoo
+  - conda-forge
+  - defaults
+  - bioconda
+dependencies:
+  - pip=21.3.1=pyhd8ed1ab_0
+  - python=3.9.0
+  - netzoopy
