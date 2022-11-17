@@ -1,5 +1,3 @@
-# libraries
-library(aws.s3)
 library(data.table)
 library(dplyr)
 library(fgsea)
@@ -11,34 +9,15 @@ library("biomaRt")
 ensembl <- useMart("ensembl")
 ensembl <- useDataset("hsapiens_gene_ensembl",mart=ensembl)
 
-# set AWS profile
-Sys.setenv("AWS_PROFILE" = "MFA")
 
-prefix = "Pooled"
+prefix = "Pooled5"
 thres = 0.005 # arbitrary
 
-# get the results from S3
-save_object(object = "dragon_mat.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_mat.tsv"),collapse="/"))
-
-save_object(object = "dragon_adj_p.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"))
-
-save_object(object = "dragon_input_mat.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"))
-
-
-res = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_mat.tsv"),collapse="/"),
+res = data.frame(fread(paste(c("data/processed",prefix,"dragon_mat.tsv"),collapse="/"),
                        sep="\t",header=T), row.names = 1)
-adj_p_val = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
+adj_p = data.frame(fread(paste(c("data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
-input = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"),
+input = data.frame(fread(paste(c("data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
 
 diag(adj_p_val) <- 1

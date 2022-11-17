@@ -6,45 +6,22 @@
 # (1) a hairball graph (2) a table consisting of all the gsea results
 # with FDRp < 0.05 for every community (3) N graphs of individual communities, where N is the number
 # of communities that have at least one pathway 
-# this merges the exploratory notebooks exploreResults.Rmd and gsea.Rmd
-# in a format that will be easy to run on the 5 different subtypes
 
 # libraries
-library(aws.s3)
 library(data.table)
 library(dplyr)
 library(fgsea)
 library(igraph)
 library(tidyverse)
 
-# set AWS profile
-Sys.setenv("AWS_PROFILE" = "MFA")
-
-prefix = "Pooled"
+prefix = "Pooled5"
 thres = 0.005 # arbitrary
 
-# get the results from S3
-save_object(object = "dragon_mat.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_mat.tsv"),collapse="/"))
-
-save_object(object = "dragon_adj_p.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"))
-
-save_object(object = "dragon_input_mat.tsv",
-            bucket = paste("netzoo/supData/dragon/dragonOutputFiles",prefix,sep="/"),
-            region="us-east-2",
-            file = paste(c("../../data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"))
-
-
-res = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_mat.tsv"),collapse="/"),
+res = data.frame(fread(paste(c("data/processed",prefix,"dragon_mat.tsv"),collapse="/"),
                        sep="\t",header=T), row.names = 1)
-adj_p = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
+adj_p = data.frame(fread(paste(c("data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
-input = data.frame(fread(paste(c("../../data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"),
+input = data.frame(fread(paste(c("data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
 
 # get numbers for paper
@@ -69,14 +46,14 @@ meth_not_exp = setdiff(methGenesOnly,exprGenesOnly)
 exp_not_meth = setdiff(exprGenesOnly,methGenesOnly)
 all_diff = c(meth_not_exp, exp_not_meth)
 write.table(all_diff,
-            "../../data/interim/gene_names_diff.tsv",
+            "data/interim/gene_names_diff.tsv",
             sep="\t",row.names=F,col.names = "geneName")
 
-folder = paste("../../reports/figures",prefix,sep="/")
+folder = paste("reports/figures",prefix,sep="/")
 if (!file.exists(folder))
-  dir.create(folder)
+  dir.create(folder,recursive = T)
 
-pdf(paste(c("../../reports/figures",prefix,"diagnostics.pdf"),collapse="/"))
+pdf(paste(c("reports/figures",prefix,"diagnostics.pdf"),collapse="/"))
 hist(as.matrix(adj_p),main="DRAGON edge FDR distribution", xlab="FDR")
 hist(as.matrix(adj_p[adj_p < 0.05]),main="DRAGON edge FDR distribution \n FDR < 0.05", xlab="FDR")
 hist(as.matrix(res),breaks=100, xlab="partial correlation", 
@@ -84,7 +61,7 @@ hist(as.matrix(res),breaks=100, xlab="partial correlation",
 dev.off()
 sum(adj_p < 0.005)
 
-jpeg("../../reports/figures/FDRdist.jpeg",width=8,height=6,units="in",res=300)
+jpeg("reports/figures/FDRdist.jpeg",width=8,height=6,units="in",res=300)
 par(mfrow=c(1,2))
 hist(as.matrix(adj_p),main="DRAGON edge FDR distribution", xlab="FDR")
 hist(as.matrix(adj_p[adj_p < 0.05]),main="DRAGON edge FDR distribution \n FDR < 0.05", xlab="FDR")
@@ -108,7 +85,7 @@ edge_colors = ifelse(E(mysmallgraph)$weight > 0,"red","blue")
 set.seed(2022)
 mylayout = layout_with_graphopt(mysmallgraph)
 
-jpeg(paste(c("../../reports/figures",prefix,"hairball.jpeg"),collapse="/"),width=10,height=10,units="in",res=300)
+jpeg(paste(c("reports/figures",prefix,"hairball.jpeg"),collapse="/"),width=10,height=10,units="in",res=300)
 
 plot(mysmallgraph,
      vertex.label=NA,
@@ -196,7 +173,7 @@ summary(factor(summary(factor(comms$membership),maxsum=300)))
 #1 
 
 # hairball comms plots
-jpeg(paste(c("../../reports/figures",prefix,"hairball_comms.jpeg"),collapse="/"),width=10,height=10,units="in",res=300)
+jpeg(paste(c("reports/figures",prefix,"hairball_comms.jpeg"),collapse="/"),width=10,height=10,units="in",res=300)
 set.seed(2022)
 
 # using code from https://stackoverflow.com/questions/16390221/how-to-make-grouped-layout-in-igraph
@@ -241,9 +218,9 @@ sum(summary(factor(comms$membership),maxsum = 300)>=5)
 
 # do enrichment analysis
 download.file("https://data.broadinstitute.org/gsea-msigdb/msigdb/release/7.5.1/c2.cp.reactome.v7.5.1.symbols.gmt",
-              destfile = "../../data/external/c2.cp.reactome.v7.5.1.symbols.gmt")
+              destfile = "data/external/c2.cp.reactome.v7.5.1.symbols.gmt")
 
-pathways_reactome = gmtPathways("../../data/external/c2.cp.reactome.v7.5.1.symbols.gmt") #../../data/external/c5.go.bp.v7.5.1.symbols.gmt")
+pathways_reactome = gmtPathways("data/external/c2.cp.reactome.v7.5.1.symbols.gmt") #../../data/external/c5.go.bp.v7.5.1.symbols.gmt")
 pathways_methylation= lapply(pathways_reactome,function(x){paste(x,"methylation",sep="_")})
 pathways_expression = lapply(pathways_reactome,function(x){paste(x,"expr",sep="_")})
 pathways_both = lapply(pathways_reactome,function(x){a=paste(x,"methylation",sep="_"); b= paste(x,"expr",sep="_"); return(c(a,b))})
@@ -316,7 +293,7 @@ for(i in 1:length(enrichedCommsExpr))
 
 sigResults$overlapGenes = sapply(sigResults$overlapGenes,function(x){paste(x,collapse=";")})
 # turn overlap into a string using collapse before applyingcharacter
-write.table(apply(sigResults,2,as.character),paste(c("../../reports/figures/brcaCommsTable_",prefix,".tsv"),collapse=""),
+write.table(apply(sigResults,2,as.character),paste(c("reports/figures/brcaCommsTable_",prefix,".tsv"),collapse=""),
             row.names=F,quote=F,sep="\t")
 
 sigComms = sigResults %>% group_by(community,commSize,method) %>% 
@@ -329,7 +306,7 @@ sigComms = sigResults %>% group_by(community,commSize,method) %>%
 length(unique(sigComms$community))
 #10 communities are enriched at FDR < 0.05
 
-pdf(paste(c("../../reports/figures/brcaComms_all59_",prefix,".pdf"),collapse=""),width=10,height=10)
+pdf(paste(c("reports/figures/brcaComms_all59_",prefix,".pdf"),collapse=""),width=10,height=10)
 
 for(i in 1:nrow(sigComms))
 {
@@ -393,9 +370,9 @@ for(i in special)
 {
   # write membership table for community 14 for analysis
   thisComm = data.frame("gene"=comms$names[comms$membership == i])
-  write.table(thisComm,file=paste(c("../../data/interim/comm",i,".tsv"),collapse=""),row.names=F)
+  write.table(thisComm,file=paste(c("data/interim/comm",i,".tsv"),collapse=""),row.names=F)
   
-  filename = paste(c("../../reports/figures/brcaComms_enriched_",prefix,"_",i,".jpeg"),collapse="")
+  filename = paste(c("reports/figures/brcaComms_enriched_",prefix,"_",i,".jpeg"),collapse="")
   jpeg(filename, width=10,height=10,units="in",res=300)
   theseNodes = comms$names[comms$membership == i]
   mysmallgraph = induced_subgraph(mygraph,V(mygraph)$name %in% theseNodes)

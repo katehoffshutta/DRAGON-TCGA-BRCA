@@ -50,12 +50,14 @@ betaToM = function(beta)
 # this function does imputation and transformation and should be applied within subtype
 cleanMethylationData = function(meth_df, npn=T, mval=F) # meth_df is a data frame of beta means, rows=samples, first column=sample ids,  cols=genes
 {
-  meth_dfComplete = removeMissing(meth_df,thres = 0.2)
+  meth_dfWhole = removeMissing(meth_df,thres = 0.2)
   # skip anything w/more than 0.2 missing
+  
+  meth_dfComplete = meth_dfWhole
   
   for(i in 2:ncol(meth_dfComplete))
   {
-    meth_dfComplete[,i] = meanImpute(meth_df[,i])
+    meth_dfComplete[,i] = meanImpute(meth_dfWhole[,i])
   }
   
   # sanity check the imputation
@@ -102,6 +104,7 @@ transformedData = analysis_dataset %>%
   dplyr::select(TCGA_short,contains("_methylation")) %>%
   cleanMethylationData(npn=T,mval=F)
 
+znfs = transformedData %>% select(contains("ZNF"))
 standardize = function(x){return((x-mean(x))/sd(x))}
 methTransfStd = data.frame(apply(transformedData,2,standardize))
 

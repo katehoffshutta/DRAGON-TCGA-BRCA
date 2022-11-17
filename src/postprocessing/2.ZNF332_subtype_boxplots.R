@@ -6,7 +6,7 @@ library(data.table)
 library(dplyr)
 
 # load the subtype data
-meth = data.table(fread("../../data/interim/analysis_dataset.tsv",sep="\t",header=T))
+meth = data.table(fread("data/interim/analysis_dataset.tsv",sep="\t",header=T))
 
 
 my_comparisons <- list( c("Basal","Her2"),
@@ -27,6 +27,6 @@ methBoxplots = function(myGene)
     stat_compare_means(vjust=-20,color="red")
 }
 
-jpeg("../../reports/figures/ZNF334_methylation.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/ZNF334_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("ZNF334_methylation")
 dev.off()

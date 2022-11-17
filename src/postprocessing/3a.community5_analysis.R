@@ -4,18 +4,10 @@ library(gridExtra)
 library(data.table)
 library(dplyr)
 
-Sys.setenv("AWS_PROFILE" = "MFA")
-
-save_object(object="analysis_dataset.tsv",
-            bucket = "netzoo/supData/dragon/dragonInputData", 
-            region="us-east-2",
-            multipart=F,
-            file="../../data/interim/analysisDataset.txt")
-
 # load the subtype data
-meth = data.table(fread("../../data/interim/analysis_dataset.tsv",sep="\t",header=T))
+meth = data.table(fread("data/interim/analysis_dataset.tsv",sep="\t",header=T))
 
-comm5_genes = read.table("../../data/interim/comm5.tsv",sep="\t",header=T)
+comm5_genes = read.table("data/interim/comm5.tsv",sep="\t",header=T)
 
 
 # more numbers for paper
@@ -42,27 +34,30 @@ methBoxplots = function(myGene)
     stat_compare_means(vjust=-20,color="red")
 }
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2A_methylation.jpeg",width=6,height=6,units="in",res=300)
+if(!dir.exists("reports/figures/communityDetection/community5"))
+  dir.create("reports/figures/communityDetection/community5",recursive = T)
+
+jpeg("reports/figures/communityDetection/community5/TFAP2A_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2A_methylation")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2B_methylation.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community5/TFAP2B_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2B_methylation")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2C_methylation.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community5/TFAP2C_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2C_methylation")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2A_expression.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community5/TFAP2A_expression.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2A_expr")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2B_expression.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community5/TFAP2B_expression.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2B_expr")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community5/TFAP2C_expression.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community5/TFAP2C_expression.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("TFAP2C_expr")
 dev.off()
 
