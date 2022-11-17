@@ -1,11 +1,7 @@
-library(aws.s3)
 library(data.table)
 library(dplyr)
 library(GenomicDataCommons)
 library(magrittr)
-
-Sys.setenv("AWS_PROFILE" = "MFA")
-
 # function from: https://seandavi.github.io/post/2017-12-29-genomicdatacommons-id-mapping/
 
 TCGAtranslateID = function(file_ids, legacy = FALSE) {
@@ -25,14 +21,7 @@ TCGAtranslateID = function(file_ids, legacy = FALSE) {
                     submitter_id = unlist(id_list)))
 }
 
-# download analysis dataset
-save_object(object="analysis_dataset.tsv",
-            bucket = "netzoo/supData/dragon/dragonInputData", 
-            region="us-east-2",
-            multipart=F,
-            file="analysis_dataset.tsv")
-
-analysis_dataset = read.table("analysis_dataset.tsv",sep="\t",header=T)
+analysis_dataset = read.table("data/interim/analysis_dataset.tsv",sep="\t",header=T)
 
 expr = analysis_dataset %>% dplyr::select(TCGA_short,contains("_expr")) 
 row.names(expr) = analysis_dataset$TCGA_short
@@ -74,10 +63,6 @@ exprTransfStd$TCGA_barcode = row.names(exprTransfStd)
 outdf = exprTransfStd %>% dplyr::relocate(TCGA_barcode)
 
 # write analysis dataset to file
-write.table(outdf,file="../../data/interim/gene_expression_processed.tsv",sep="\t",row.names=F,quote=F)
-put_object(file="../../data/interim/gene_expression_processed.tsv",
-           bucket = "netzoo/supData/dragon/dragonInputData", 
-           region="us-east-2",
-           multipart=F)
+write.table(outdf,file="data/interim/gene_expression_processed.tsv",sep="\t",row.names=F,quote=F)
 
 

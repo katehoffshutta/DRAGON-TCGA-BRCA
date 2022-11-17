@@ -6,10 +6,9 @@ output: html_document
 ---
 
 ```{R setup}
-library(aws.s3)
 library(data.table)
 library(tidyverse)
-# need: https://zwdzwd.github.io/InfiniumAnnotation
+# Annotations from: https://zwdzwd.github.io/InfiniumAnnotation
 ```
 
 The purpose of this code is map probes to gene, going from a matrix of probes x samples to a matrix of genes x samples. At this state, we want to simply map each promoter to its nearest gene. For this we need the probe manifest. See this helpful file: https://support.illumina.com/content/dam/illumina-support/documents/downloads/productfiles/methylationepic/infinium-methylationepic-manifest-column-headings.pdf
@@ -17,13 +16,13 @@ The purpose of this code is map probes to gene, going from a matrix of probes x 
 ```{R}
 # source hg38 with gencode 36 from https://zwdzwd.github.io/InfiniumAnnotation
 
-download.file('https://zhouserver.research.chop.edu/InfiniumAnnotation/20210615/HM450/HM450.hg38.manifest.gencode.v36.tsv.gz', destfile = "../../data/external/HM450.hg38.manifest.gencode.v36.tsv.gz")
+download.file('https://zhouserver.research.chop.edu/InfiniumAnnotation/20210615/HM450/HM450.hg38.manifest.gencode.v36.tsv.gz', destfile = "data/external/HM450.hg38.manifest.gencode.v36.tsv.gz")
 
 # unzip
-system2(command="gunzip",args=c("../../data/external/HM450.hg38.manifest.gencode.v36.tsv.gz"))
+system2(command="gunzip",args=c("data/external/HM450.hg38.manifest.gencode.v36.tsv.gz"))
 
 # load into memory
-manifest = data.frame(fread("../../data/external/HM450.hg38.manifest.gencode.v36.tsv",sep="\t",header=T))
+manifest = data.frame(fread("data/external/HM450.hg38.manifest.gencode.v36.tsv",sep="\t",header=T))
 ```
 
 ```{R}
@@ -89,14 +88,14 @@ grep(";",mymap[,2])
 Write table for those probes that mapped to promoter regions:
 
 ```{R}
-write.table(na.omit(mymap),file="../../data/processed/PromoterProbeMap450K.txt",sep="\t",row.names=F,quote=F)
+write.table(na.omit(mymap),file="data/processed/PromoterProbeMap450K.txt",sep="\t",row.names=F,quote=F)
 ```
 
 Upload this map to S3 for reproducibility:
 
 ```{R}
 Sys.setenv("AWS_PROFILE" = "MFA")
-put_object(file="../../data/processed/PromoterProbeMap450K.txt",
+put_object(file="data/processed/PromoterProbeMap450K.txt",
       object = "PromoterProbeMap450K.txt",
       bucket = "netzoo/supData/dragon",
       region="us-east-2",
@@ -106,7 +105,7 @@ put_object(file="../../data/processed/PromoterProbeMap450K.txt",
 Here is code to make a second version in which everything with multiple genes is split to long format. This was needed when we allowed a probe to map to multiple genes, keeping it here in case we decide to do that later. 
 
 ```{R eval=F}
-mymap = read.table("../../data/processed/PromoterProbeMap450K.txt",sep="\t",header=T)
+mymap = read.table("data/processed/PromoterProbeMap450K.txt",sep="\t",header=T)
 names(mymap) = c("probeID","gene")
 doubleGenes = mymap[grep(";",mymap[,2]),]
 for(i in 1:nrow(doubleGenes))
@@ -120,5 +119,5 @@ for(i in 1:nrow(doubleGenes))
 }
 
 mymap_long = mymap[-grep(";",mymap[,2]),]
-write.table(na.omit(mymap_long),file="../../data/processed/ProbeMap450K_longForm.txt",sep="\t",row.names=F,quote=F)
+write.table(na.omit(mymap_long),file="data/processed/ProbeMap450K_longForm.txt",sep="\t",row.names=F,quote=F)
 ```

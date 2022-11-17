@@ -9,7 +9,7 @@ demographics_small = clindat$demographic %>%
   dplyr::select(c("race","gender","ethnicity","case_id"))
 labeled_demographic = left_join(demographics_small,clindat$main,by="case_id")
 write.table(labeled_demographic,
-            file = "../../data/external/TCGA_BRCA_clinical.tsv",
+            file = "data/external/TCGA_BRCA_clinical.tsv",
             sep = "\t",
             row.names = F,
             quote = F)
