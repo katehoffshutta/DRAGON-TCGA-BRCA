@@ -20,13 +20,10 @@
 # ...
 # geneN_meth_sd
 
-library(aws.s3)
 library(data.table)
 library(dplyr)
 library(stringr)
 library(TCGAbiolinks)
-
-Sys.setenv("AWS_PROFILE" = "MFA")
 
 # function from: https://seandavi.github.io/post/2017-12-29-genomicdatacommons-id-mapping/
 
@@ -47,7 +44,7 @@ TCGAtranslateID = function(file_ids, legacy = FALSE) {
                     submitter_id = unlist(id_list)))
 }
 
-subtypeDat = read.table("../../data/external/brcaTypes.tsv",sep="\t",header=T)
+subtypeDat = read.table("data/external/brcaTypes.tsv",sep="\t",header=T)
 analysisDataset_B = data.frame("TCGA_long"=subtypeDat$pan.samplesID, 
                                "TCGA_short"=subtypeDat$shortID,
                                "TCGA_shorter"=substr(subtypeDat$shortID,start=1,stop=12),
@@ -56,7 +53,7 @@ analysisDataset_B = data.frame("TCGA_long"=subtypeDat$pan.samplesID,
 dim(analysisDataset_B)
 # [1] 1218    4
 
-demoDat = read.table("../../data/external/TCGA_BRCA_clinical.tsv",sep = "\t", header=T)
+demoDat = read.table("data/external/TCGA_BRCA_clinical.tsv",sep = "\t", header=T)
 analysisDataset_C = data.frame("TCGA_shorter" = substr(demoDat$submitter_id,start=1,stop=12),
                                "race" = demoDat$race,
                                "ethnicity" = demoDat$ethnicity,
@@ -65,26 +62,19 @@ analysisDataset_C = data.frame("TCGA_shorter" = substr(demoDat$submitter_id,star
 dim(analysisDataset_C)
 # [1] 1085    4
 
-save_object(object = "beta_means.txt",
-            bucket = "netzoo/supData/dragon/dragonDataPreprocessing/methylation",
-            region="us-east-2",
-            file = "tmp.txt")
-methylationAll = as.data.frame(fread("tmp.txt"))
-
-# remove the file once it's in memory
-system2(command="rm",args=c("tmp.txt"))
+methylationAll = read.table("data/interim/beta_means.txt")
 dim(methylationAll)
 #[1]  885 1591
 
 names(methylationAll) = paste0(names(methylationAll),"_methylation")
-names(methylationAll)[1]="UUID"
+#names(methylationAll)[1]="UUID"
 
-UUIDs = methylationAll[,1]%>% 
-  str_replace("X","") %>%
-  str_replace_all("\\.","-")
+#UUIDs = methylationAll[,1]%>% 
+#  str_replace("X","") %>%
+#  str_replace_all("\\.","-")
 
 analysisDataset_D = methylationAll 
-analysisDataset_D$UUID = UUIDs
+analysisDataset_D$UUID = row.names(methylationAll)
 dim(analysisDataset_D)
 #[1]  885 1591
 # 885 is the right number for the analysis dataset
@@ -152,15 +142,7 @@ analysisDataset_BEC_uniq = analysisDataset_BEC %>% dplyr::filter(!(UUID %in% pro
 dim(analysisDataset_BEC_uniq)
 # [1] 776  16
 
-# get the gene expression data from S3
-save_object(object = "gene_expression.tsv",
-            bucket = "netzoo/supData/dragon/dragonDataPreprocessing/gene_expression/",
-            region="us-east-2",
-            file = "tmp.txt")
-expr = as.data.frame(fread("tmp.txt"))
-# remove the file once it's in memory
-system2(command="rm",args=c("tmp.txt"))
-
+expr = read.table("data/interim/gene_expression.tsv",sep="\t",header=T)
 names(expr)[1]="ens_id"
 names(expr)[2]="gene_name"
 
@@ -183,6 +165,12 @@ gene_names = exprClean$gene_name
 sample_names = colnames(exprClean)[-c(1:2)]
 exprT = data.frame(t(exprClean[,-c(1:2)]))
 colnames(exprT) = paste0(gene_names,"_expr")
+
+row.names(exprT) = row.names(exprT)%>% 
+  str_replace("X","") %>%
+  str_replace_all("\\.","-")
+  
+  
 exprTCGA = TCGAtranslateID(row.names(exprT))
 names(exprTCGA)[1]="UUID"
 names(exprTCGA)[2]="TCGA_short"
@@ -196,14 +184,11 @@ problems2 = analysisDataset_F %>% dplyr::filter(TCGA_short == c("TCGA-A7-A13E-01
 problems3 = analysisDataset_F %>% dplyr::filter(TCGA_short == c("TCGA-A7-A26E-01A"))
 problems4 = analysisDataset_F %>% dplyr::filter(TCGA_short == c("TCGA-A7-A26J-01A"))
 
-# get the raw counts from S3 so we can calculate read depth for any duplicates
-save_object(object = "gene_expression_unstranded_raw.tsv",
-            bucket = "netzoo/supData/dragon/dragonDataPreprocessing/gene_expression/",
-            region="us-east-2",
-            file = "tmp.txt")
-expr_raw = as.data.frame(fread("tmp.txt"))
-system2(command="rm",args=c("tmp.txt"))
-
+expr_raw = read.table("data/interim/gene_expression_unstranded_raw.tsv",sep="\t",header=T)
+colnames(expr_raw) = colnames(expr_raw)%>% 
+  str_replace("X","") %>%
+  str_replace_all("\\.","-")
+  
 # calculate read depth by summing counts across all genes; choose the expt w best depth
 problemUUIDs = analysisDataset_F %>% dplyr::filter(TCGA_short %in% c("TCGA-A7-A13D-01A",
                                          "TCGA-A7-A13E-01A",
@@ -211,7 +196,7 @@ problemUUIDs = analysisDataset_F %>% dplyr::filter(TCGA_short %in% c("TCGA-A7-A1
                                          "TCGA-A7-A26J-01A")) %>%
   dplyr::select(UUID)
 
-tfList = read.table("../../data/external/TF_names_v_1.01.txt")[,1]
+tfList = read.table("data/external/TF_names_v_1.01.txt")[,1]
 
 read_depth = expr_raw %>% dplyr::filter(gene_name %in% tfList) %>%
   dplyr::select(all_of(problemUUIDs$UUID)) %>% 
@@ -264,39 +249,4 @@ apply(table1final,2,function(x){summary(as.factor(x))})
 length(grep("_expr",names(analysisDataset_final)))
 length(grep("_meth",names(analysisDataset_final)))
 
-write.table(analysisDataset_final,file="../../data/interim/analysis_dataset.tsv",sep="\t",row.names=F,quote=F)
-
-put_object(file="../../data/interim/analysis_dataset.tsv",
-           bucket = "netzoo/supData/dragon/dragonInputData", 
-           region="us-east-2",
-           multipart=F)
-
-Sys.setenv("AWS_PROFILE" = "default")
-
-# Make the list of non-overlapping genes
-# to make sure there are not updated HNGC symbols 
-# Moved this into src/postprocessing/0.full-postprocess.R 
-# so that the numbers for the paper are describing
-# those we actually used for the analysis
-# 
-# library(dplyr)
-# library(stringr)
-# ad = read.table("data/interim/analysis_dataset.tsv",sep="\t",header=T)
-# methylation_genes = ad %>% 
-#   select(-UUID_meth) %>% # remove UUID
-#   select(contains("methylation")) %>% 
-#   names() %>%
-#   str_replace("_methylation","")
-# 
-# expression_genes = ad %>% 
-#   select(-UUID_expr) %>% # remove UUID
-#   select(contains("_expr")) %>% 
-#   names() %>%
-#   str_replace("_expr","")
-# 
-# meth_not_exp = setdiff(methylation_genes,expression_genes)
-# exp_not_meth = setdiff(expression_genes,methylation_genes)
-# all_diff = c(meth_not_exp, exp_not_meth)
-# write.table(all_diff,
-#             "data/interim/gene_names_diff.tsv",
-#             sep="\t",row.names=F,col.names = "geneName")
+write.table(analysisDataset_final,file="data/interim/analysis_dataset.tsv",sep="\t",row.names=F,quote=F)

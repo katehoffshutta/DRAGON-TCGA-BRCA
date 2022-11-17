@@ -29,7 +29,7 @@ print(lambdas)
 r = get_partial_correlation_dragon(meth_data,exp_data,lambdas)
 newnames = sum([meth_data.columns.tolist(),exp_data.columns.tolist()],[])
 
-out_dir_long = "../../data/processed/" + out_dir
+out_dir_long = "data/processed/" + out_dir
 if not os.path.exists(out_dir_long):
     os.mkdir(out_dir_long)
 

@@ -9,9 +9,9 @@ library(data.table)
 library(dplyr)
 
 # load the subtype data
-meth = data.table(fread("../../data/interim/analysis_dataset.tsv",sep="\t",header=T))
+meth = data.table(fread("data/interim/analysis_dataset.tsv",sep="\t",header=T))
 
-comm38_genes = read.table("../../data/interim/comm38.tsv",sep="\t",header=T)
+comm38_genes = read.table("data/interim/comm38.tsv",sep="\t",header=T)
 
 
 # more numbers for paper
@@ -38,15 +38,18 @@ methBoxplots = function(myGene)
     stat_compare_means(vjust=-20,color="red")
 }
 
-jpeg("../../reports/figures/communityDetection/community38/KLF6_methylation.jpeg",width=6,height=6,units="in",res=300)
+if(!dir.exists("reports/figures/communityDetection/community38/"))
+  dir.create("reports/figures/communityDetection/community38/")
+
+jpeg("reports/figures/communityDetection/community38/KLF6_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("KLF6_methylation")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community38/NR4A2_methylation.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community38/NR4A2_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("NR4A2_methylation")
 dev.off()
 
-jpeg("../../reports/figures/communityDetection/community38/ATF1_methylation.jpeg",width=6,height=6,units="in",res=300)
+jpeg("reports/figures/communityDetection/community38/ATF1_methylation.jpeg",width=6,height=6,units="in",res=300)
 methBoxplots("ATF1_methylation")
 dev.off()
 

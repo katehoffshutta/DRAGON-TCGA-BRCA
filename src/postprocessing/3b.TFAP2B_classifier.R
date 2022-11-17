@@ -4,7 +4,7 @@ library(dplyr)
 library(pROC)
 
 # load the subtype data
-meth = data.table(fread("../../data/interim/analysis_dataset.tsv",sep="\t",header=T))
+meth = data.table(fread("data/interim/analysis_dataset.tsv",sep="\t",header=T))
 dat = meth %>% dplyr::select("Subtype_mRNA","ATF1_methylation","TFAP2B_methylation", "TFAP2B_expr")
 dat$basal = ifelse(dat$Subtype_mRNA == "Basal",1,0)
 
@@ -47,3 +47,4 @@ roc(basal ~ prob3,data = dat)
 roc(basal ~ ATF1_methylation, data = dat)
 roc(basal ~ TFAP2B_methylation, data = dat)
 roc(basal ~ TFAP2B_expr, data = dat)
+

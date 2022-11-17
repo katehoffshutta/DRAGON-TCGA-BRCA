@@ -1,14 +1,9 @@
 # Get TCGA ids, merge with clinical data, select only 450k values, impute missing values, log transform, standardize
-
-library(aws.s3)
 library(data.table)
 library(dplyr)
 library(GenomicDataCommons)
 library(magrittr)
 library(huge)
-
-# set the appropriate profile
-Sys.setenv("AWS_PROFILE" = "MFA")
 
 # function from: https://seandavi.github.io/post/2017-12-29-genomicdatacommons-id-mapping/
 
@@ -55,12 +50,14 @@ betaToM = function(beta)
 # this function does imputation and transformation and should be applied within subtype
 cleanMethylationData = function(meth_df, npn=T, mval=F) # meth_df is a data frame of beta means, rows=samples, first column=sample ids,  cols=genes
 {
-  meth_dfComplete = removeMissing(meth_df,thres = 0.2)
+  meth_dfWhole = removeMissing(meth_df,thres = 0.2)
   # skip anything w/more than 0.2 missing
+  
+  meth_dfComplete = meth_dfWhole
   
   for(i in 2:ncol(meth_dfComplete))
   {
-    meth_dfComplete[,i] = meanImpute(meth_df[,i])
+    meth_dfComplete[,i] = meanImpute(meth_dfWhole[,i])
   }
   
   # sanity check the imputation
@@ -98,13 +95,7 @@ cleanMethylationData = function(meth_df, npn=T, mval=F) # meth_df is a data fram
   
 }
 
-save_object(object="analysis_dataset.tsv",
-                             bucket = "netzoo/supData/dragon/dragonInputData", 
-                             region="us-east-2",
-                             multipart=F,
-                             file="analysis_dataset.tsv")
-
-analysis_dataset = read.table("analysis_dataset.tsv",sep="\t",header=T)
+analysis_dataset = read.table("data/interim/analysis_dataset.tsv",sep="\t",header=T)
 
 dim(analysis_dataset) 
 # [1] 765 3236
@@ -113,6 +104,7 @@ transformedData = analysis_dataset %>%
   dplyr::select(TCGA_short,contains("_methylation")) %>%
   cleanMethylationData(npn=T,mval=F)
 
+znfs = transformedData %>% select(contains("ZNF"))
 standardize = function(x){return((x-mean(x))/sd(x))}
 methTransfStd = data.frame(apply(transformedData,2,standardize))
 
@@ -122,11 +114,7 @@ summary(apply(methTransfStd,2,sd))
 methTransfStd$TCGA_barcode = row.names(methTransfStd)
 outdf = methTransfStd %>% dplyr::relocate(TCGA_barcode)
 
-write.table(outdf,file="../../data/interim/methylation_processed_npn.tsv",sep="\t",row.names=F,quote=F)
-put_object(file="../../data/interim/methylation_processed_npn.tsv",
-           bucket = "netzoo/supData/dragon/dragonInputData", 
-           region="us-east-2",
-           multipart=F)
+write.table(outdf,file="data/interim/methylation_processed_npn.tsv",sep="\t",row.names=F,quote=F)
 
 # for sensitivity analyses, also store the untransformed data
 
@@ -136,11 +124,8 @@ rawData = analysis_dataset %>%
 rawData$TCGA_barcode = row.names(rawData)
 
 outdf = rawData %>% dplyr::relocate(TCGA_barcode)
-write.table(outdf,file="../../data/interim/methylation_raw.tsv",sep="\t",row.names=F,quote=F)
-put_object(file="../../data/interim/methylation_raw.tsv",
-           bucket = "netzoo/supData/dragon/dragonInputData", 
-           region="us-east-2",
-           multipart=F)
+write.table(outdf,file="data/interim/methylation_raw.tsv",sep="\t",row.names=F,quote=F)
+
 
 # for sensitivity analyses, also store the M-value transformation
 
@@ -150,8 +135,5 @@ mvalData = analysis_dataset %>%
 mvalData$TCGA_barcode = row.names(rawData)
 outdf = mvalData %>% dplyr::relocate(TCGA_barcode)
 
-write.table(outdf,file="../../data/interim/methylation_processed_m_val.tsv",sep="\t",row.names=F,quote=F)
-put_object(file="../../data/interim/methylation_processed_m_val.tsv",
-           bucket = "netzoo/supData/dragon/dragonInputData", 
-           region="us-east-2",
-           multipart=F)
+write.table(outdf,file="data/interim/methylation_processed_m_val.tsv",sep="\t",row.names=F,quote=F)
+

@@ -9,6 +9,6 @@ library(tidyverse)
 molecular.subtypes <- PanCancerAtlas_subtypes()
 brcaTypes = molecular.subtypes %>% dplyr::filter(cancer.type == "BRCA") 
 brcaTypes$shortID = substr(brcaTypes$pan.samplesID,start=1,stop=16)
-write.table(brcaTypes,"../../data/external/brcaTypes.tsv",sep="\t",row.names=F,quote=F)
+write.table(brcaTypes,"data/external/brcaTypes.tsv",sep="\t",row.names=F,quote=F)
 
 
