@@ -9,3 +9,4 @@ dependencies:
   - python=3.9.0
   - netzoopy
   - r-base=4.2.0
+  

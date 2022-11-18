@@ -8,7 +8,7 @@ ge_manifest = files() %>%
     GenomicDataCommons::filter( data_type == 'Gene Expression Quantification') %>%
     GenomicDataCommons::filter( cases.demographic.gender == 'female') %>%
     manifest() %>%
-    dplyr::filter(!grepl("splice_junctions",filename))
+    dplyr::filter(!grepl("splice_junctions",file_name))
 
 write.table(ge_manifest,file = "data/external/TCGA_BRCA_gene_expression_manifest.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 

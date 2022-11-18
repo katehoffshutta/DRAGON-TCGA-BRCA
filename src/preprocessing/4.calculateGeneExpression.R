@@ -8,14 +8,14 @@ ge_manifest = files() %>%
     GenomicDataCommons::filter( data_type == 'Gene Expression Quantification') %>%
     GenomicDataCommons::filter( cases.demographic.gender == 'female') %>%
     manifest() %>%
-    dplyr::filter(!grepl("splice_junctions",filename))
+    dplyr::filter(!grepl("splice_junctions",file_name))
 
 tfList = read.table("data/external/TF_names_v_1.01.txt")[,1]
 
 # There are 1639 genes in the TF list. Read a first file to populate the data frame.
 
 direname = ge_manifest$id[1]
-filename = ge_manifest$filename[1]
+filename = ge_manifest$file_name[1]
 
 exp_raw = fread(paste(c("data/external/tcga_BRCA_gene_expression",direname,filename),collapse="/"),sep="\t",header=T)
 
@@ -34,7 +34,7 @@ for(j in 1:length(ge_manifest$id))
   print(paste("Processing expression file: ",j))
   # get expression file from s3
   direname = ge_manifest$id[j]
-  filename = ge_manifest$filename[j]
+  filename = ge_manifest$file_name[j]
 
   exp_raw = fread(paste(c("data/external/tcga_BRCA_gene_expression",direname,filename),collapse="/"),sep="\t",header=T)
   
@@ -61,7 +61,7 @@ for(j in 1:length(ge_manifest$id))
   print(paste("Processing expression file: ",j))
   # get expression file from s3
   direname = ge_manifest$id[j]
-  filename = ge_manifest$filename[j]
+  filename = ge_manifest$file_name[j]
   
   exp_raw = fread(paste(c("data/external/tcga_BRCA_gene_expression",direname,filename),collapse="/"),sep="\t",header=T)
 

@@ -186,9 +186,9 @@ edge.weights <- function(community, network, weight.within = 100, weight.between
 
 mysmallcommgraph = mysmallgraph
 E(mysmallcommgraph)$weights = edge.weights(comms,mysmallgraph)
+get_indx = which(comms$membership %in% c(6,14))
 mysmallcommgraph = induced_subgraph(mysmallgraph, get_indx)
 E(mysmallcommgraph)$weight = edge.weights(comms,mysmallcommgraph)
-get_indx = which(comms$membership %in% c(6,14))
 set.seed(46)
 plot(mysmallcommgraph,
      vertex.label=NA,

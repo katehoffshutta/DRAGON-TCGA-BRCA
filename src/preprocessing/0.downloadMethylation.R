@@ -15,7 +15,7 @@ head(ge_manifest)
 write.table(ge_manifest,file = "data/external/TCGA_BRCA_methylation_manifest.txt", sep = "\t", row.names = FALSE, quote = FALSE)
 
 # Data in manuscript pulled 20220709
-for(i in 1:length(ge_manifest$id))
+for(i in 300:length(ge_manifest$id))
 {     
   options(warn=2)
   print(paste("Processing file:",i))

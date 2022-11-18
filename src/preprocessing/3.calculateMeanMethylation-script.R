@@ -66,7 +66,7 @@ processFile = function(x)
   x = as.data.frame(t(x))
   print(x$id)
   direname = x$id
-  filename = x$filename
+  filename = x$file_name
   methylation = fread(paste(c("data/external/tcga_BRCA_methylation",direname,filename),collapse="/"))
   # # save_object(object = filename,
   # #             bucket = paste(c("netzoo/supData/dragon/dragonDataPreprocessing/methylation/",direname),collapse=""), 

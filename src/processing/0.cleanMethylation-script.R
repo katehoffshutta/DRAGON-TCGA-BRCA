@@ -104,7 +104,6 @@ transformedData = analysis_dataset %>%
   dplyr::select(TCGA_short,contains("_methylation")) %>%
   cleanMethylationData(npn=T,mval=F)
 
-znfs = transformedData %>% select(contains("ZNF"))
 standardize = function(x){return((x-mean(x))/sd(x))}
 methTransfStd = data.frame(apply(transformedData,2,standardize))
 
