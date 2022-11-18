@@ -1,5 +1,5 @@
 if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+  install.packages("BiocManager", repos = "https://cloud.r-project.org")
 
 BiocManager::install("biomaRt")
 BiocManager::install("GenomicDataCommons")
@@ -19,4 +19,4 @@ install.packages(c("data.table",
                    "pROC",
                    "stringr",
                    "tidyverse",
-                   "xtable"))
+                   "xtable"),"https://cloud.r-project.org")

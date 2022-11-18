@@ -22,6 +22,7 @@
 
 library(data.table)
 library(dplyr)
+library(GenomicDataCommons)
 library(stringr)
 library(TCGAbiolinks)
 

@@ -1,4 +1,4 @@
-name: netzoopy_env
+name: dragon_env
 channels:
   - netzoo
   - conda-forge
@@ -8,3 +8,4 @@ dependencies:
   - pip=21.3.1=pyhd8ed1ab_0
   - python=3.9.0
   - netzoopy
+  - r-base=4.2.0
