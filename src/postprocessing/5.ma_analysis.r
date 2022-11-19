@@ -9,24 +9,22 @@ library("biomaRt")
 ensembl <- useMart("ensembl")
 ensembl <- useDataset("hsapiens_gene_ensembl",mart=ensembl)
 
-
 prefix = "Pooled5"
-thres = 0.005 # arbitrary
 
 res = data.frame(fread(paste(c("data/processed",prefix,"dragon_mat.tsv"),collapse="/"),
                        sep="\t",header=T), row.names = 1)
-adj_p = data.frame(fread(paste(c("data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
+adj_p_val = data.frame(fread(paste(c("data/processed",prefix,"dragon_adj_p.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
 input = data.frame(fread(paste(c("data/processed",prefix,"dragon_input_mat.tsv"),collapse="/"),
                          sep="\t",header=T),row.names = 1)
 
 diag(adj_p_val) <- 1
 
-par_cor <- read.table(file = "../OneDrive_1_11/dragon_mat.tsv",sep = "\t", row.names = 1, header = TRUE)
-X <- read.table(file = "../OneDrive_1_11/dragon_input_mat.tsv",sep = "\t", row.names = 2, header = TRUE)
+par_cor <- res
+X <- input
 X <- X[,-1]
 dim(X)
-library(Hmisc) # You need to download it first.
+library(Hmisc) 
 cor_X <- rcorr(as.matrix(X), type="pearson")
 cor_mat <- cor_X$r 
 cor_p_mat <- cor_X$P
@@ -121,10 +119,6 @@ cor_pearson_temp <- cor_pearson_temp[features,features]
 sum(diag(cor_pearson_temp)[diag(adj_p_val_expr_methylation_pearson_temp<0.05)]>0)/sum(diag(adj_p_val_expr_methylation_pearson_temp<0.05))
 sum(diag(cor_pearson_temp)[diag(adj_p_val_expr_methylation_pearson_temp<0.05)]<0)/sum(diag(adj_p_val_expr_methylation_pearson_temp<0.05))
 
-
-
-
-
 res <- extract_variable("ZFP57_expr")#ZFP57 acts by controlling DNA methylation during the earliest multicellular stages of development at multiple imprinting control regions (ICRs) (PubMed:18622393, PubMed:30602440).
 res <- res[order(abs(res[,2])),]
 
@@ -161,8 +155,7 @@ summarize_target_list <- function(target_list){
     temp_targets <- temp_targets[order(abs(temp_targets[,2]), decreasing=TRUE),]
     temp_targets <-  cbind(temp_targets, sign_rho=paste(rownames(temp_targets), 
                                                         c("(-)","(+)")[as.integer(temp_targets[,2]>0)+1], sep=""))
-    #print(temp_targets)
-    
+
     summary_list <- rbind(summary_list, c(gsub("_expr","",i), nrow(temp_targets), paste(temp_targets[,"sign_rho"], collapse = ', ')))
   }
   colnames(summary_list) <- c("TF RNA", "#related methylation sites", "related methylation sites (+/-=edge sign)")
@@ -171,5 +164,3 @@ summarize_target_list <- function(target_list){
 
 library(xtable)
 xtable(summarize_target_list(c("ZFP57_expr", "ZNF334_expr", "NR6A1_expr", "MYRFL_expr")))
-
-paste(c("A","B"), c("-","+"))
