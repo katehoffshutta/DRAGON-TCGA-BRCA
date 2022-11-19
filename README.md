@@ -14,6 +14,8 @@ From the base directory in the repository, run the three shell scripts sequentia
 ./runPostprocessing.sh
 ```
 
+Reference: [![DOI](https://zenodo.org/badge/513280418.svg)](https://zenodo.org/badge/latestdoi/513280418)
+
 ## Workflow
 In src/preprocessing, you will find the scripts used to pull TCGA data, to map methylation probes to TF promoter regions, and to merge phenotypic, methylation, and gene expression data.
 
